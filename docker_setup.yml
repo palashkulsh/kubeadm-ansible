@@ -1,0 +1,12 @@
+---
+- name: install docker play
+  hosts: all
+  become: true
+  become_method: sudo
+  tasks:
+    - name: install docker role
+      import_role:
+        name: ansible-docker
+  tags:
+    - docker_install
+          

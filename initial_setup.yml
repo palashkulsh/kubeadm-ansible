@@ -1,0 +1,63 @@
+---
+- name: install basic apt tools
+  hosts: all
+  become: true
+  become_method: sudo
+  tasks:
+    - name: install via apt
+      ansible.builtin.apt:
+        update_cache: true
+        package:
+          - net-tools
+          - firewalld
+  tags:
+    - apt_install
+
+- name: install docker play
+  hosts: all
+  become: true
+  become_method: sudo
+  tasks:
+    - name: install docker role
+      import_role:
+        name: ansible-docker
+    - name: remove containerd toml
+      file:
+        path: /etc/containerd/config.toml
+        state: absent
+    - name: restart containerd
+      ansible.builtin.systemd:
+        name: containerd
+        state: restarted
+  tags:
+    - docker
+    
+- name: firewall changes
+  hosts: all
+  become: true
+  become_method: sudo 
+  tasks:
+    - name: make firewall changes
+      ansible.posix.firewalld:
+        service: "{{ item }}"
+        permanent: yes
+        immediate: yes
+        state: enabled
+      loop:
+        - "http"
+        - "https"
+    - name: allow on trusted network
+      ansible.posix.firewalld:
+        zone: trusted
+        source: "172.16.0.0/20"
+        permanent: true
+        immediate: true
+        state: enabled
+      loop:
+        - "172.16.0.0/20"
+        - "10.0.0.0/8"
+      tags:
+        - add_trusted_firewall
+  tags:
+    - firewall
+      

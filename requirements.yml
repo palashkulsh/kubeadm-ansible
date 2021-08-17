@@ -1,0 +1,9 @@
+---
+roles:
+  - src: https://github.com/nickjj/ansible-docker
+    name: ansible-docker
+    version: master
+    scm: git
+
+collections:
+  - ansible.posix
