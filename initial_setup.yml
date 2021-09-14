@@ -49,15 +49,32 @@
     - name: allow on trusted network
       ansible.posix.firewalld:
         zone: trusted
-        source: "172.16.0.0/20"
+        source: "{{item}}"
         permanent: true
         immediate: true
         state: enabled
       loop:
-        - "172.16.0.0/20"
+        - "172.16.0.0/12"
         - "10.0.0.0/8"
+        - "192.168.0.0/16"
       tags:
         - add_trusted_firewall
+    - name: enable ip forwarding
+      ansible.posix.sysctl:
+        name: net.ipv4.ip_forward
+        value: '1'
+        sysctl_set: yes
+        state: present
+        reload: yes
+      tags:
+        - ip_forward
+        
+    - name: use legacy iptables as debian has nftables which kubernetes doesn't support
+      shell: |
+        update-alternatives --set iptables /usr/sbin/iptables-legacy
+        update-alternatives --set ip6tables /usr/sbin/ip6tables-legacy
+      tags:
+        - use_legacy_iptables
   tags:
     - firewall
       
