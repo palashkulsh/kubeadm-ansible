@@ -4,6 +4,10 @@ roles:
     name: ansible-docker
     version: master
     scm: git
-
+  - src: https://github.com/nginxinc/ansible-role-nginx
+    name: ansible-role-nginx
+    version: main
+    scm: git
+    
 collections:
   - ansible.posix
