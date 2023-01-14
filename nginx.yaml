@@ -1,0 +1,35 @@
+---
+- name: Install Nginx
+  hosts: all
+  become: yes
+  roles:
+    - role: ansible-role-nginx
+  post_tasks:
+      - name: start nginx 
+        ansible.builtin.service:
+          name: nginx
+          state: started
+  tags:
+    - nginx
+
+- name: allow firewall rules
+  hosts: all
+  become: true
+  become_method: sudo
+  pre_tasks:
+    - name: install firewall-cmd
+      ansible.builtin.apt:
+        name: firewalld     
+  tasks:
+    - name: permit traffic in default zone for https service
+      ansible.posix.firewalld:
+        service: "{{ item }}"
+        permanent: yes
+        immediate: yes
+        state: enabled
+      loop:
+        - "http"
+        - "https"
+  tags:
+    - firewall
+    
